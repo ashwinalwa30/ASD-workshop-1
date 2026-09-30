@@ -14,5 +14,17 @@ app.get("/product", async (req, res) => {
     }
 })
 
+app.get("/product/:id", async (req, res) => {
+    try {
+        const data = await fs.promises.readFile(filepath, "utf-8")
+        const products = JSON.parse(data)
+        const id = Number(req.params.id)
+        const content = products.find((x) => x.id === id)
+        res.status(200).json(content)
+    } catch (error) {
+        res.status(500).json({ message: "Server Error" })
+    }
+})
+
 
 app.listen(3000)
