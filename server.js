@@ -1,42 +1,21 @@
 const express = require("express")
 const app = express()
-const fs = require("fs")
-const path = require("path")
-const filepath = path.join(__dirname, "./db.json")
-async function readfilewithdelay() {
-    return new Promise((resolve, reject) => {
-        setTimeout(async () => {
-            try {
-                const data = await fs.promises.readFile(filepath, "utf-8")
-                const products = JSON.parse(data)
-                resolve(products)
-            } catch (error) {
-                reject(error)
-            }
-        }, 1500)
+const productRoutes = require("./routes/productsRoutes")
+
+app.use(express.json())
+app.use(productRoutes)
+
+app.use((err, req, res, next) => {
+    if (err instanceof SyntaxError && err.status === 400 && "body" in err) {
+        return res.status(400).json({
+            message: "Invalid JSON"
+        })
+    }
+    return res.status(500).json({
+        message: "Server Error"
     })
-}
-app.get("/product", async (req, res) => {
-    try {
-        const data = await fs.promises.readFile(filepath, "utf-8")
-        const products = JSON.parse(data)
-        res.status(200).json(products)
-    } catch (error) {
-        res.status(500).json({ message: "Server Error" })
-    }
 })
 
-app.get("/product/:id", async (req, res) => {
-    try {
-        const data = await fs.promises.readFile(filepath, "utf-8")
-        const products = JSON.parse(data)
-        const id = Number(req.params.id)
-        const content = products.find((x) => x.id === id)
-        res.status(200).json(content)
-    } catch (error) {
-        res.status(500).json({ message: "Server Error" })
-    }
+app.listen(3000, () => {
+    console.log("Server running on port 3000")
 })
-
-
-app.listen(3000)
